@@ -7,9 +7,19 @@
 
 import UIKit
 
-final class OnboardingView: SuperViewController {
+
+protocol stackViewControllerDelegate: AnyObject {
     
-    let onboardingArray: [OnboardingModel] = [
+    func skipButtonPressed()
+    func nextButtonPressed()
+    
+}
+
+final class OnboardingViewController: SuperViewController {
+    
+    
+    
+    private let onboardingArray: [OnboardingModel] = [
         OnboardingModel(image: UIImage(named: "1"), title: "Create an account", subtitle: "Connect with people around the world", message: "Users will be able to go live, chat and meet with people near by"),
         OnboardingModel(image: UIImage(named: "2"), title: "Log in to your account", subtitle: "Let's build connection with new peoples", message: "Connect helps you locate the people around you who are closet from your home town!"),
         OnboardingModel(image: UIImage(named: "3"), title: "Char with friends", subtitle: "Fell the happiness", message: "Find a new friends and start chatting")]
@@ -22,7 +32,7 @@ final class OnboardingView: SuperViewController {
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: viewLayout)
         collectionView.isPagingEnabled = true
         collectionView.isDirectionalLockEnabled = true
-        collectionView.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0)
+        collectionView.isUserInteractionEnabled = false
         return collectionView
     }()
     
@@ -36,7 +46,17 @@ final class OnboardingView: SuperViewController {
         
     }()
     
-    let stackView = OnboardingStackView()
+    private let stackView = OnboardingStackView()
+    
+    private let buttonToNext: UIButton = {
+        let button = UIButton(type: .custom)
+        button.setTitle("Get start", for: .normal)
+        button.layer.cornerRadius = 10
+        button.backgroundColor = R.Colors.blue
+        button.addTarget(self, action: #selector(toSignInView), for: .touchUpInside)
+        return button
+    }()
+    
     
     
     
@@ -47,19 +67,47 @@ final class OnboardingView: SuperViewController {
         pageControl.numberOfPages = onboardingArray.count
         collectionView.delegate = self
         collectionView.dataSource = self
+        stackView.delegate = self
         collectionView.register(OnboardingCell.self, forCellWithReuseIdentifier: OnboardingCell.identifier)
         collectionView.reloadData()
     }
     
     
 }
-@objc extension OnboardingView {
-    func toNextView() {
-        navigationController?.pushViewController(SignInView(), animated: true)
-        
+@objc extension OnboardingViewController {
+    func toSignInView() {
+        self.navigationController?.pushViewController(SigninViewController(), animated: true)
+        UserDefaults.standard.hasOnboarded = true
     }
 }
-extension OnboardingView: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+extension OnboardingViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, stackViewControllerDelegate {
+    func nextButtonPressed() {
+        
+        if pageControl.currentPage == onboardingArray.count - 1 {
+            self.stackView.removeFromSuperview()
+            self.view.addView(view: buttonToNext)
+            buttonToNext.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+            buttonToNext.topAnchor.constraint(equalTo: pageControl.bottomAnchor, constant: 25).isActive = true
+            buttonToNext.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 30).isActive = true
+            buttonToNext.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -30).isActive = true
+        } else {
+            pageControl.currentPage += 1
+            collectionView.scrollToItem(at: IndexPath(item: pageControl.currentPage, section: 0), at: .centeredHorizontally, animated: true)
+        }
+        
+        
+        
+        
+        
+    }
+    
+    func skipButtonPressed() {
+        self.navigationController?.pushViewController(SigninViewController(), animated: true)
+        UserDefaults.standard.hasOnboarded = true
+    }
+    
+    
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         onboardingArray.count
     }
@@ -73,6 +121,7 @@ extension OnboardingView: UICollectionViewDelegate, UICollectionViewDataSource, 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: collectionView.frame.width, height: collectionView.frame.height)
     }
+    
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         self.pageControl.currentPage = indexPath.row
     }
@@ -81,7 +130,7 @@ extension OnboardingView: UICollectionViewDelegate, UICollectionViewDataSource, 
     
 }
 
-extension OnboardingView {
+extension OnboardingViewController {
     
     override func setupViews() {
         super.setupViews()
@@ -95,11 +144,6 @@ extension OnboardingView {
         super.constraintViews()
         
         NSLayoutConstraint.activate([
-            
-//            backgroundImage.topAnchor.constraint(equalTo: view.topAnchor),
-//            backgroundImage.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-//            backgroundImage.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-//            backgroundImage.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             
             
             collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -115,14 +159,16 @@ extension OnboardingView {
             stackView.topAnchor.constraint(equalTo: pageControl.bottomAnchor, constant: 25),
             stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 30),
             stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -30),
-            stackView.heightAnchor.constraint(equalToConstant: 40)
+            stackView.heightAnchor.constraint(equalToConstant: 40),
+            
+            
+            
+            
             
             
         ])
     }
     override func configureAppearance() {
-        let button1 = UIBarButtonItem(title: "Skip", image: UIImage(named: "arrow.right"), target: self, action: #selector(toNextView))
-        self.navigationItem.rightBarButtonItem  = button1
         view.backgroundColor = .white
         
     }

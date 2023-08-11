@@ -80,7 +80,7 @@ extension OnboardingCell {
            subtitle.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
            subtitle.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
             
-            onboardingImage.topAnchor.constraint(equalTo: subtitle.bottomAnchor, constant: 25),
+            onboardingImage.topAnchor.constraint(equalTo: subtitle.bottomAnchor, constant: (self.frame.height * 1) / 5),
             onboardingImage.leadingAnchor.constraint(equalTo: leadingAnchor),
             onboardingImage.trailingAnchor.constraint(equalTo: trailingAnchor),
             onboardingImage.heightAnchor.constraint(equalToConstant: self.frame.width / 2),
@@ -93,7 +93,7 @@ extension OnboardingCell {
         
     }
     func configureAppearance() {
-        backgroundColor = .cyan
+        backgroundColor = .white
     }
 }
 

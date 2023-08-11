@@ -8,8 +8,12 @@
 import UIKit
 
 
+
+
 final class OnboardingStackView: BaseView {
     
+   
+    weak var delegate: stackViewControllerDelegate?
     
     private let stackView: UIStackView = {
         let stackView = UIStackView()
@@ -21,16 +25,19 @@ final class OnboardingStackView: BaseView {
     private let skipButton: UIButton = {
         var configuration = UIButton.Configuration.filled()
         configuration.baseBackgroundColor = .white
-        configuration.attributedTitle = AttributedString("SKIP", attributes: AttributeContainer([NSAttributedString.Key.foregroundColor: UIColor(red: 179/255.0, green: 186/255.0, blue: 202/255.0, alpha: 1.0),NSAttributedString.Key.font: UIFont.systemFont(ofSize: 15, weight: .heavy)]))
+        configuration.attributedTitle = AttributedString("SKIP", attributes: AttributeContainer([NSAttributedString.Key.foregroundColor: R.Colors.gray, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 15, weight: .heavy)]))
+        
         let button = UIButton(configuration: configuration)
+        button.addTarget(self, action: #selector(toNextView), for: .touchUpInside)
         return button
     }()
     
     private let nextButton: UIButton = {
         var configuration = UIButton.Configuration.filled()
         configuration.baseBackgroundColor = .white
-        configuration.attributedTitle = AttributedString("NEXT", attributes: AttributeContainer([NSAttributedString.Key.foregroundColor: UIColor(red: 108/255.0, green: 99/255.0, blue: 255/255.0, alpha: 1.0),NSAttributedString.Key.font: UIFont.systemFont(ofSize: 15, weight: .heavy)]))
+        configuration.attributedTitle = AttributedString("NEXT", attributes: AttributeContainer([NSAttributedString.Key.foregroundColor: R.Colors.blue, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 15, weight: .heavy)]))
         let button = UIButton(configuration: configuration)
+        button.addTarget(self, action: #selector(toNextSlide), for: .touchUpInside)
         return button
     }()
     
@@ -70,5 +77,13 @@ extension OnboardingStackView {
     }
     override func configureAppearance() {
         
+    }
+}
+@objc extension OnboardingStackView {
+    func toNextView() {
+        self.delegate?.skipButtonPressed()
+    }
+    func toNextSlide() {
+        self.delegate?.nextButtonPressed()
     }
 }

@@ -17,8 +17,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+        var navigationController = UINavigationController()
         
-        let navigationController = UINavigationController(rootViewController: OnboardingView())
+        if UserDefaults.standard.hasOnboarded {
+            navigationController = UINavigationController(rootViewController: SigninViewController())
+        } else {
+             navigationController = UINavigationController(rootViewController: OnboardingViewController())
+        }
         
         
         guard let windowScene = (scene as? UIWindowScene) else { return }
